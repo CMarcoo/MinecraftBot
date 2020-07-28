@@ -61,6 +61,7 @@ public final class HandshakePacket extends AbstractPacket {
 
     @Override
     public void sendPacket(final DataOutputStream dos) throws IOException {
+        writeData(dos);
         DataUtils.writeVarInt(dos, b.size());
         dos.write(b.toByteArray());
     }
