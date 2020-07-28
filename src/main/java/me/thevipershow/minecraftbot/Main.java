@@ -47,9 +47,8 @@ public final class Main {
 
             println(String.format("Connected to destination Socket: [%s, %d]", address, port));
 
-            final DataOutputStream dataOutputStream = new DataOutputStream(socket.getOutputStream());
-            final DataInputStream dataInputStream = new DataInputStream(socket.getInputStream());
-
+            final DataOutputStream dataOutputStream = new DataOutputStream(socket.getOutputStream()); // client -> server
+            final DataInputStream dataInputStream = new DataInputStream(socket.getInputStream()); // server -> client
 
             // Initializing the HandshakePacket (https://wiki.vg/Protocol#Handshake)
             // This packet is the first packet and will be sent to the server, telling him to start a login phase.
