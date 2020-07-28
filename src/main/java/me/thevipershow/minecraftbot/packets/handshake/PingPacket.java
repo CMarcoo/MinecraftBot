@@ -6,10 +6,10 @@ import me.thevipershow.minecraftbot.packets.PacketType;
 
 public final class PingPacket extends AbstractPacket {
     public PingPacket() {
-        super(0x01, PacketType.TO_SERVER);
+        super(0x00, PacketType.TO_SERVER);
     }
 
     @Override
-    public void writeData(final DataOutputStream dos) {
+    public void writeData() {
     }
 }

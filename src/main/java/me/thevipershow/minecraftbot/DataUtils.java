@@ -2,8 +2,11 @@ package me.thevipershow.minecraftbot;
 
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
+import java.io.FilterInputStream;
+import java.io.FilterOutputStream;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
+import me.thevipershow.minecraftbot.packets.AbstractPacket;
 
 public final class DataUtils {
 
@@ -14,13 +17,13 @@ public final class DataUtils {
             throw new IOException(String.format("Cannot write string is too big (%d) bytes, max (%d).", byteLength, Short.MAX_VALUE));
         else {
             writeVarInt(dos, byteLength);
-            for (final byte b : bytes)
-                dos.writeByte(b);
+            dos.write(bytes, 0, bytes.length);
         }
     }
 
     public static String readString(final DataInputStream dis) throws IOException {
-        final byte[] bytes = dis.readNBytes(readVarInt(dis));
+        final int length = readVarInt(dis);
+        final byte[] bytes = dis.readNBytes(length);
         return new String(bytes, StandardCharsets.UTF_8);
     }
 
@@ -42,8 +45,7 @@ public final class DataUtils {
                 out.writeByte(paramInt);
                 return;
             }
-
-            out.writeByte(paramInt & 0x7F | 0x80);   // 0x7F is 127 - 0x80 is 128
+            out.writeByte(paramInt & 0x7F | 0x80); // 0x7F is 127 - 0x80 is 128
             paramInt >>>= 7;
         }
     }

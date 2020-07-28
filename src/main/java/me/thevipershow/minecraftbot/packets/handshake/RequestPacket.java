@@ -10,6 +10,6 @@ public final class RequestPacket extends AbstractPacket {
     }
 
     @Override
-    public void writeData(final DataOutputStream dos) { // do nothing. Avoid UnsupportedOperationException
+    public void writeData() { // do nothing. Avoid UnsupportedOperationException
     }
 }

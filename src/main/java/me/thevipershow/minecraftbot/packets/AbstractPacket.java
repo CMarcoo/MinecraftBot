@@ -1,12 +1,16 @@
 package me.thevipershow.minecraftbot.packets;
 
+import java.io.ByteArrayOutputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
+import java.io.OutputStream;
 import me.thevipershow.minecraftbot.DataUtils;
 
 public abstract class AbstractPacket implements Packet {
     private final int id;
     private final PacketType packetType;
+    private final ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
+    protected final DataOutputStream dataOutputStream = new DataOutputStream(byteArrayOutputStream);
 
     public AbstractPacket(final int id, final PacketType packetType) {
         this.id = id;
@@ -22,7 +26,7 @@ public abstract class AbstractPacket implements Packet {
     }
 
     public void sendPacket(final DataOutputStream dos) throws IOException {
-        DataUtils.writeVarInt(dos, id);
-        writeData(dos);
+        DataUtils.writeVarInt(dos, byteArrayOutputStream.size());
+        dos.write(byteArrayOutputStream.toByteArray());
     }
 }

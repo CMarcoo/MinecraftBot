@@ -23,9 +23,9 @@ public class ServerKeepAlive extends AbstractPacket {
     }
 
     @Override
-    public void writeData(final DataOutputStream dos) {
+    public void writeData() {
         try {
-            DataUtils.writeVarInt(dos, keepAliveID);
+            DataUtils.writeVarInt(dataOutputStream, keepAliveID);
         } catch (final IOException e) {
             e.printStackTrace();
         }

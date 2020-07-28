@@ -1,6 +1,5 @@
 package me.thevipershow.minecraftbot.packets.auth;
 
-import java.io.DataOutputStream;
 import java.io.IOException;
 import me.thevipershow.minecraftbot.DataUtils;
 import me.thevipershow.minecraftbot.packets.AbstractPacket;
@@ -15,18 +14,12 @@ public final class LoginStartPacket extends AbstractPacket {
     }
 
     @Override
-    public void writeData(final DataOutputStream dos) {
+    public void writeData() {
         try {
-            DataUtils.writeString(dos, username);
+            DataUtils.writeString(dataOutputStream, username);
         } catch (final IOException e) {
             e.printStackTrace();
         }
-    }
-
-    @Override
-    public void sendPacket(final DataOutputStream dos) throws IOException {
-        DataUtils.writeVarInt(dos, getId());
-        writeData(dos);
     }
 
     public String getUsername() {

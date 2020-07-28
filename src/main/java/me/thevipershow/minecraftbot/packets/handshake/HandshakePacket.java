@@ -29,7 +29,6 @@ public final class HandshakePacket extends AbstractPacket {
     private final String address;
     private final int port;
     private final HandshakeNextState nextState;
-    private ByteArrayOutputStream b;
 
     public HandshakePacket(final int protocolVersion,
                            final String address,
@@ -43,26 +42,14 @@ public final class HandshakePacket extends AbstractPacket {
     }
 
     @Override
-    public void writeData(final DataOutputStream dos) {
+    public void writeData() {
         try {
-            final ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
-            final DataOutputStream dataOutputStream = new DataOutputStream(byteArrayOutputStream);
-            dataOutputStream.writeByte(getId());
             DataUtils.writeVarInt(dataOutputStream, protocolVersion);
-            DataUtils.writeVarInt(dataOutputStream, address.length());
-            dataOutputStream.writeBytes(address);
+            DataUtils.writeString(dataOutputStream, address);
             dataOutputStream.writeShort(port);
             DataUtils.writeVarInt(dataOutputStream, nextState.status);
-            b = byteArrayOutputStream;
         } catch (final IOException e) {
             e.printStackTrace();
         }
-    }
-
-    @Override
-    public void sendPacket(final DataOutputStream dos) throws IOException {
-        writeData(dos);
-        DataUtils.writeVarInt(dos, b.size());
-        dos.write(b.toByteArray());
     }
 }

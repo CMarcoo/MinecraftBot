@@ -11,9 +11,9 @@ public final class LegacyPing extends AbstractPacket {
     }
 
     @Override
-    public void writeData(final DataOutputStream dos) {
+    public void writeData() {
         try {
-            dos.writeByte(0x01);
+            dataOutputStream.writeByte(0x01);
         } catch (final IOException e) {
             e.printStackTrace();
         }

@@ -6,7 +6,7 @@ import java.io.InputStream;
 import java.io.OutputStream;
 
 public interface Packet {
-    default void writeData(final DataOutputStream dos) {
+    default void writeData() {
         throw new UnsupportedOperationException(String.format("Packet of type %s does not support write operations.", getClass().getSimpleName()));
     }
 
