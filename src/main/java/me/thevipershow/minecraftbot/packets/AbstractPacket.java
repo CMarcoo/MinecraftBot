@@ -18,8 +18,9 @@ public abstract class AbstractPacket implements Packet {
     }
 
     public void sendPacket(final DataOutputStream dos) throws IOException {
+        writeData();
         final int packetSize = byteArrayOutputStream.size();
-        System.out.println(packetSize);
+        System.out.println(getClass().getSimpleName() + " " + packetSize);
         DataUtils.writeVarInt(dos, packetSize);
         dos.write(byteArrayOutputStream.toByteArray());
     }

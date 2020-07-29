@@ -8,6 +8,7 @@ import java.net.InetSocketAddress;
 import java.net.Socket;
 import me.thevipershow.minecraftbot.packets.auth.LoginStartPacket;
 import me.thevipershow.minecraftbot.packets.auth.LoginSuccessPacket;
+import me.thevipershow.minecraftbot.packets.auth.SetCompressionPacket;
 import me.thevipershow.minecraftbot.packets.game.PlayerKeepAlive;
 import me.thevipershow.minecraftbot.packets.handshake.HandshakePacket;
 import me.thevipershow.minecraftbot.packets.handshake.PingPacket;
@@ -60,7 +61,7 @@ public final class Main {
 
             // Initializing the HandshakePacket (https://wiki.vg/Protocol#Handshake)
             // This packet is the first packet and will be sent to the server, telling him to start a login phase.
-            final HandshakePacket handshake = new HandshakePacket(47, address, port, HandshakePacket.HandshakeNextState.STATUS);  // 0x2F is 47, the protocol for 1.8-1.8.9
+            final HandshakePacket handshake = new HandshakePacket(47, address, port, HandshakePacket.HandshakeNextState.LOGIN);  // 0x2F is 47, the protocol for 1.8-1.8.9
             handshake.sendPacket(dataOutputStream); // sending the packet to the server
 
             // Initializing the RequestPacket (https://wiki.vg/Protocol#Request)
@@ -81,8 +82,6 @@ public final class Main {
 
             println(responsePacket.getResponse());
 
-            if (true) return;
-
             // Initializing the LoginStartPacket (https://wiki.vg/Protocol#Login_Start)
             // This makes the server start the authentication process, we will skip encryption as we're targeting offline-mode.
             final LoginStartPacket loginStart = new LoginStartPacket("Skeppy");
@@ -92,7 +91,10 @@ public final class Main {
             final LoginSuccessPacket loginSuccessPacket = new LoginSuccessPacket();
             loginSuccessPacket.readData(dataInputStream); // reading data
 
-            println(loginSuccessPacket.getUuid().toString());
+            // The server should send us a setCompression packet after the login success.
+            // https://wiki.vg/Protocol#Set_Compression
+            final SetCompressionPacket setCompressionPacket = new SetCompressionPacket();
+            setCompressionPacket.readData(dataInputStream);
 
 
             dataOutputStream.close(); // closing all connections

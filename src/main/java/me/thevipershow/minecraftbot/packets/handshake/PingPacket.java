@@ -13,7 +13,7 @@ public final class PingPacket extends AbstractPacket {
     @Override
     public void writeData() {
         try {
-            dataOutputStream.writeLong(System.currentTimeMillis());
+            dataOutputStream.writeLong(420L);
         } catch (final IOException e) {
             e.printStackTrace();
         }
