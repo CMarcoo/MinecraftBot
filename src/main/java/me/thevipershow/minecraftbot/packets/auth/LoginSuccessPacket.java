@@ -19,7 +19,7 @@ public final class LoginSuccessPacket extends AbstractPacket {
     public void readData(DataInputStream dis) {
         try {
             username = DataUtils.readString(dis);
-            uuid = new UUID(dis.readLong(), dis.readLong());
+            uuid = UUID.fromString(DataUtils.readString(dis));
         } catch (final IOException e) {
             e.printStackTrace();
         }

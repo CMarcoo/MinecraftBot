@@ -16,6 +16,9 @@ public final class PlayerKeepAlive extends AbstractPacket {
     @Override
     public void readData(DataInputStream dis) {
         try {
+            final int length = DataUtils.readVarInt(dis);
+            final int packetID = DataUtils.readVarInt(dis);
+            DataUtils.checkPacket(getId(), packetID, length, false);
             keepAliveID = DataUtils.readVarInt(dis);
         } catch (final IOException e) {
             e.printStackTrace();

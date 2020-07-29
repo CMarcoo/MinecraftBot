@@ -45,7 +45,7 @@ public final class HandshakePacket extends AbstractPacket {
     public void writeData() {
         try {
             DataUtils.writeVarInt(dataOutputStream, protocolVersion);
-            DataUtils.writeString(dataOutputStream, address);
+            dataOutputStream.writeBytes(address);
             dataOutputStream.writeShort(port);
             DataUtils.writeVarInt(dataOutputStream, nextState.status);
         } catch (final IOException e) {

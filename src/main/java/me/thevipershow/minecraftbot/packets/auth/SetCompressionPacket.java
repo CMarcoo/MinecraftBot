@@ -1,4 +1,4 @@
-package me.thevipershow.minecraftbot.packets.handshake;
+package me.thevipershow.minecraftbot.packets.auth;
 
 import java.io.DataInputStream;
 import java.io.IOException;
@@ -6,14 +6,12 @@ import me.thevipershow.minecraftbot.DataUtils;
 import me.thevipershow.minecraftbot.packets.AbstractPacket;
 import me.thevipershow.minecraftbot.packets.PacketType;
 
-public final class LoginPluginRequest extends AbstractPacket {
-    public LoginPluginRequest() {
-        super(0x04, PacketType.TO_CLIENT);
-    }
+public final class SetCompressionPacket extends AbstractPacket {
+    private int threshold;
 
-    private int messageID;
-    private String identifier;
-    private byte[] data;
+    public SetCompressionPacket() {
+        super(0x03, PacketType.TO_CLIENT);
+    }
 
     @Override
     public void readData(DataInputStream dis) {
@@ -21,9 +19,7 @@ public final class LoginPluginRequest extends AbstractPacket {
             final int length = DataUtils.readVarInt(dis);
             final int packetID = DataUtils.readVarInt(dis);
             DataUtils.checkPacket(getId(), packetID, length, false);
-            messageID = DataUtils.readVarInt(dis);
-            identifier = DataUtils.readString(dis);
-            data = dis.readAllBytes();
+            this.threshold = DataUtils.readVarInt(dis);
         } catch (final IOException e) {
             e.printStackTrace();
         }

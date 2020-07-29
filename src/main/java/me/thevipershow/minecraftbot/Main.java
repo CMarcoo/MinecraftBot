@@ -6,18 +6,26 @@ import java.io.IOException;
 import java.net.InetAddress;
 import java.net.InetSocketAddress;
 import java.net.Socket;
-import java.util.concurrent.ThreadLocalRandom;
 import me.thevipershow.minecraftbot.packets.auth.LoginStartPacket;
 import me.thevipershow.minecraftbot.packets.auth.LoginSuccessPacket;
+import me.thevipershow.minecraftbot.packets.game.PlayerKeepAlive;
 import me.thevipershow.minecraftbot.packets.handshake.HandshakePacket;
 import me.thevipershow.minecraftbot.packets.handshake.PingPacket;
 import me.thevipershow.minecraftbot.packets.handshake.RequestPacket;
+import me.thevipershow.minecraftbot.packets.handshake.ResponsePacket;
 
 /**
  * @author TheViperShow
  * @version 1.0.0-SNAPSHOT
  */
 public final class Main {
+
+    public static void sleep(final long millis) {
+        try {
+            Thread.sleep(millis);
+        } catch (final InterruptedException e) {
+        }
+    }
 
     public static void println(final String s) {
         System.out.println(s);
@@ -39,7 +47,7 @@ public final class Main {
 
             final InetAddress dstAddress = InetAddress.getByName(address);
             final Socket socket = new Socket();
-            socket.setSoTimeout(3500); // this sets a connection timeout, the connection will close if the server doesn't respond for more than 3.5 sec
+            socket.setSoTimeout(5000); // this sets a connection timeout, the connection will close if the server doesn't respond for more than 3.5 sec
             socket.setTcpNoDelay(true); // Enable Nagle's algorithm
             socket.setTrafficClass(18); // settings traffic class.
             final InetSocketAddress inetSocketAddress = new InetSocketAddress(dstAddress, port); // The server we are going to connect to
@@ -52,7 +60,7 @@ public final class Main {
 
             // Initializing the HandshakePacket (https://wiki.vg/Protocol#Handshake)
             // This packet is the first packet and will be sent to the server, telling him to start a login phase.
-            final HandshakePacket handshake = new HandshakePacket(0x2F, address, port, HandshakePacket.HandshakeNextState.LOGIN);  // 0x2F is 47, the protocol for 1.8-1.8.9
+            final HandshakePacket handshake = new HandshakePacket(47, address, port, HandshakePacket.HandshakeNextState.STATUS);  // 0x2F is 47, the protocol for 1.8-1.8.9
             handshake.sendPacket(dataOutputStream); // sending the packet to the server
 
             // Initializing the RequestPacket (https://wiki.vg/Protocol#Request)
@@ -60,18 +68,31 @@ public final class Main {
             final RequestPacket request = new RequestPacket();
             request.sendPacket(dataOutputStream); // sending the packet to the server
 
+            // Initializing the PingPacket (https://wiki.vg/Protocol#Ping)
+            // This packet is only used by "Notchian" servers and should be sent right after a request packet
+            // In order for the server to send back a response.
+            final PingPacket pingPacket = new PingPacket();
+            pingPacket.sendPacket(dataOutputStream);
+
+            // Initializing a response packet (https://wiki.vg/Protocol#Response)
+            // We should receive this packet from the server which will contain server information.
+            final ResponsePacket responsePacket = new ResponsePacket();
+            responsePacket.readData(dataInputStream);
+
+            println(responsePacket.getResponse());
+
+            if (true) return;
+
             // Initializing the LoginStartPacket (https://wiki.vg/Protocol#Login_Start)
             // This makes the server start the authentication process, we will skip encryption as we're targeting offline-mode.
             final LoginStartPacket loginStart = new LoginStartPacket("Skeppy");
             loginStart.sendPacket(dataOutputStream); // sending the packet to the server
 
             // We'll start reading packets , if everything has worked we should receive a LoginSuccessPacket (https://wiki.vg/Protocol#Login_Success)
-            final int packetLength = DataUtils.readVarInt(dataInputStream); // we first read (Length of packet data + length of the packet ID)
-            final int packetID = DataUtils.readVarInt(dataInputStream); // Then we read the ID of the packet (VarInt).
+            final LoginSuccessPacket loginSuccessPacket = new LoginSuccessPacket();
+            loginSuccessPacket.readData(dataInputStream); // reading data
 
-            println(packetLength + " " + packetID);
-
-
+            println(loginSuccessPacket.getUuid().toString());
 
 
             dataOutputStream.close(); // closing all connections

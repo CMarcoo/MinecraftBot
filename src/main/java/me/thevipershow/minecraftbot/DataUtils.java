@@ -21,6 +21,24 @@ public final class DataUtils {
         }
     }
 
+    public static void checkPacket(final int expectedID, final int actualId, final int length, final boolean emptyPacket) throws IOException {
+        if (actualId == -1) {
+            throw new IOException("Premature end of stream.");
+        }
+
+        if (actualId != expectedID) { //we want a status response
+            throw new IOException("Invalid packetID");
+        }
+
+        if (length == -1) {
+            throw new IOException("Premature end of stream.");
+        }
+
+        if (emptyPacket)
+            if (length == 0)
+                throw new IOException("This packet should not be empty.");
+    }
+
     public static String readString(final DataInputStream dis) throws IOException {
         final int length = readVarInt(dis);
         final byte[] bytes = dis.readNBytes(length);
