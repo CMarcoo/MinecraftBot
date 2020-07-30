@@ -16,6 +16,7 @@ public final class LoginStartPacket extends AbstractPacket {
     @Override
     public void writeData() {
         try {
+            writeID();
             DataUtils.writeString(dataOutputStream, username);
         } catch (final IOException e) {
             e.printStackTrace();

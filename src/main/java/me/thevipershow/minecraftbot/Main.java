@@ -8,6 +8,9 @@ import java.io.IOException;
 import java.net.InetAddress;
 import java.net.Socket;
 import me.thevipershow.minecraftbot.json.ServerResponse;
+import me.thevipershow.minecraftbot.packets.auth.LoginStartPacket;
+import me.thevipershow.minecraftbot.packets.auth.LoginSuccessPacket;
+import me.thevipershow.minecraftbot.packets.auth.SetCompressionPacket;
 import me.thevipershow.minecraftbot.packets.handshake.HandshakePacket;
 import me.thevipershow.minecraftbot.packets.handshake.PingPacket;
 import me.thevipershow.minecraftbot.packets.handshake.RequestPacket;
@@ -58,32 +61,21 @@ public final class Main {
             final DataOutputStream dataOutputStream = new DataOutputStream(socket.getOutputStream()); // client -> server
             final DataInputStream dataInputStream = new DataInputStream(socket.getInputStream()); // server -> client
 
-            // Initializing the HandshakePacket (https://wiki.vg/Protocol#Handshake)
-            // This packet is the first packet and will be sent to the server, telling him to start a login phase.
-            final HandshakePacket handshake = new HandshakePacket(0x2F, address, port, HandshakePacket.HandshakeNextState.STATUS);  // 0x2F is 47, the protocol for 1.8-1.8.9
-            handshake.sendPacket(dataOutputStream); // sending the packet to the server
+            final HandshakePacket handshake = new HandshakePacket(0x2F, address, port, HandshakePacket.HandshakeNextState.LOGIN);
+            final LoginStartPacket loginStart = new LoginStartPacket("LegitPlayer");
+            final LoginSuccessPacket loginSuccessPacket = new LoginSuccessPacket();
+            final SetCompressionPacket setCompressionPacket = new SetCompressionPacket();
 
-            // Initializing the RequestPacket (https://wiki.vg/Protocol#Request)
-            // This is an empty packet with id 0x00 and should be sent immediately after the Handshake.
-            final RequestPacket request = new RequestPacket();
-            request.sendPacket(dataOutputStream); // sending the packet to the server
+            handshake.sendPacket(dataOutputStream);
+            loginStart.sendPacket(dataOutputStream);
 
-            // Initializing the PingPacket (https://wiki.vg/Protocol#Ping)
-            // This packet is only used by "Notchian" servers and should be sent right after a request packet
-            // In order for the server to send back a response.
-            final PingPacket pingPacket = new PingPacket();
-            pingPacket.sendPacket(dataOutputStream);
-
-            // Initializing a response packet (https://wiki.vg/Protocol#Response)
-            // We should receive this packet from the server which will contain server information.
-            final ResponsePacket responsePacket = new ResponsePacket();
-            responsePacket.readData(dataInputStream);
-
-            println(DataUtils.formatJson(responsePacket.getResponse())); // printing the result
+            loginSuccessPacket.readData(dataInputStream);
+            setCompressionPacket.readData(dataInputStream);
 
             dataOutputStream.close(); // closing all connections
             dataInputStream.close();
             socket.close();
+            println("Closed all connections");
 
         } catch (final IOException e) {
             e.printStackTrace();

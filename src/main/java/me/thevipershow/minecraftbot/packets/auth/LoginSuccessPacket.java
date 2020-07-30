@@ -18,8 +18,11 @@ public final class LoginSuccessPacket extends AbstractPacket {
     @Override
     public void readData(DataInputStream dis) {
         try {
+            final int length = DataUtils.readVarInt(dis);
+            final int id = DataUtils.readVarInt(dis);
+            DataUtils.checkPacket(getId(), id, length, false);
             username = DataUtils.readString(dis);
-            uuid = UUID.fromString(DataUtils.readString(dis));
+            uuid = UUID.fromString(DataUtils.readUnformattedString(dis));
         } catch (final IOException e) {
             e.printStackTrace();
         }

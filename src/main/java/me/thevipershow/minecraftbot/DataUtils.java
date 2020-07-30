@@ -7,6 +7,10 @@ import java.io.FilterOutputStream;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import me.thevipershow.minecraftbot.packets.AbstractPacket;
+import me.thevipershow.minecraftbot.packets.handshake.HandshakePacket;
+import me.thevipershow.minecraftbot.packets.handshake.PingPacket;
+import me.thevipershow.minecraftbot.packets.handshake.RequestPacket;
+import me.thevipershow.minecraftbot.packets.handshake.ResponsePacket;
 
 public final class DataUtils {
 
@@ -27,7 +31,7 @@ public final class DataUtils {
         }
 
         if (actualId != expectedID) { //we want a status response
-            throw new IOException("Invalid packetID");
+            throw new IOException("Invalid packetID, received " + actualId);
         }
 
         if (length == -1) {
@@ -43,6 +47,39 @@ public final class DataUtils {
         final int length = readVarInt(dis);
         final byte[] bytes = dis.readNBytes(length);
         return new String(bytes, StandardCharsets.UTF_8);
+    }
+
+    public static String readUnformattedString(final DataInputStream dis) throws IOException {
+        final StringBuffer stringBuffer = new StringBuffer();
+        int read;
+        while ((read = dis.read()) != -1)
+            stringBuffer.append((char) read);
+        return stringBuffer.toString();
+    }
+
+    public static String serverLookup(final DataOutputStream dataOutputStream, final DataInputStream dataInputStream, final String address, final int port) throws IOException {
+        // Initializing the HandshakePacket (https://wiki.vg/Protocol#Handshake)
+        // This packet is the first packet and will be sent to the server, telling him to start a login phase.
+        final HandshakePacket handshake = new HandshakePacket(0x2F, address, port, HandshakePacket.HandshakeNextState.STATUS);  // 0x2F is 47, the protocol for 1.8-1.8.9
+        handshake.sendPacket(dataOutputStream); // sending the packet to the server
+
+        // Initializing the RequestPacket (https://wiki.vg/Protocol#Request)
+        // This is an empty packet with id 0x00 and should be sent immediately after the Handshake.
+        final RequestPacket request = new RequestPacket();
+        request.sendPacket(dataOutputStream); // sending the packet to the server
+
+        // Initializing the PingPacket (https://wiki.vg/Protocol#Ping)
+        // This packet is only used by "Notchian" servers and should be sent right after a request packet
+        // In order for the server to send back a response.
+        final PingPacket pingPacket = new PingPacket();
+        pingPacket.sendPacket(dataOutputStream);
+
+        // Initializing a response packet (https://wiki.vg/Protocol#Response)
+        // We should receive this packet from the server which will contain server information.
+        final ResponsePacket responsePacket = new ResponsePacket();
+        responsePacket.readData(dataInputStream);
+
+        return responsePacket.getResponse();
     }
 
     public static String formatJson(final String json) {
