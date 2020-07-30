@@ -17,8 +17,8 @@ public final class ResponsePacket extends AbstractPacket {
     @Override
     public void readData(final DataInputStream dis) {
         try {
-            int length = DataUtils.readVarInt(dis);
-            int id = DataUtils.readVarInt(dis);
+            final int length = DataUtils.readVarInt(dis);
+            final int id = DataUtils.readVarInt(dis);
             DataUtils.checkPacket(getId(), id, length, false);
             final int stringLength = DataUtils.readVarInt(dis);
             final byte[] in = new byte[stringLength];

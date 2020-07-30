@@ -45,6 +45,34 @@ public final class DataUtils {
         return new String(bytes, StandardCharsets.UTF_8);
     }
 
+    public static String formatJson(final String json) {
+        final StringBuilder output = new StringBuilder();
+        final char[] chars = json.toCharArray();
+        for (int i = 0; i < chars.length; i++) {
+            final char currentChar = chars[i];
+            if (i + 1 < chars.length) {
+                final char nextChar = chars[i + 1];
+                output.append(currentChar);
+                if (currentChar == '{') {
+                    output.append('\n');
+                } else if (currentChar == '[' && nextChar == '{') {
+                    output.append('\n');
+                } else if (currentChar == '}' && nextChar == ',') {
+                    output.append('\n');
+                } else if (currentChar == '"' && (nextChar == '{' || nextChar == '}')) {
+                    output.append('\n');
+                } else if (currentChar == ']' && nextChar == '}') {
+                    output.append('\n');
+                } else if (currentChar == ',') {
+                    output.append('\n');
+                }
+            } else {
+                break;
+            }
+        }
+        return output.toString();
+    }
+
     public static int readVarInt(final DataInputStream in) throws IOException {
         int i = 0;
         int j = 0;

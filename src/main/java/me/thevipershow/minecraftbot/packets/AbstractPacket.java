@@ -17,11 +17,13 @@ public abstract class AbstractPacket implements Packet {
         this.packetType = packetType;
     }
 
+    public void writeID() throws IOException {
+        DataUtils.writeVarInt(dataOutputStream, getId());
+    }
+
     public void sendPacket(final DataOutputStream dos) throws IOException {
         writeData();
-        final int packetSize = byteArrayOutputStream.size();
-        System.out.println(getClass().getSimpleName() + " " + packetSize);
-        DataUtils.writeVarInt(dos, packetSize);
+        DataUtils.writeVarInt(dos, byteArrayOutputStream.size());
         dos.write(byteArrayOutputStream.toByteArray());
     }
 

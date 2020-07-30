@@ -13,7 +13,7 @@ public final class LegacyPing extends AbstractPacket {
     @Override
     public void writeData() {
         try {
-            dataOutputStream.writeByte(0x01);
+            dataOutputStream.writeByte(HandshakePacket.HandshakeNextState.STATUS.getStatus());
         } catch (final IOException e) {
             e.printStackTrace();
         }
