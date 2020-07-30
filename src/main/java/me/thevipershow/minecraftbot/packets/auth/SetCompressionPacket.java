@@ -20,6 +20,7 @@ public final class SetCompressionPacket extends AbstractPacket {
             final int packetID = DataUtils.readVarInt(dis);
             DataUtils.checkPacket(getId(), packetID, length, false);
             this.threshold = DataUtils.readVarInt(dis);
+            System.out.println("Read compression threshold: " + threshold);
         } catch (final IOException e) {
             e.printStackTrace();
         }

@@ -10,7 +10,12 @@ public final class PlayerKeepAlive extends AbstractPacket {
     private int keepAliveID;
 
     public PlayerKeepAlive() {
-        super(0x00, PacketType.TO_SERVER);
+        super(0x00, PacketType.TO_CLIENT);
+    }
+
+    public PlayerKeepAlive(final int keepAliveID) {
+        this();
+        this.keepAliveID = keepAliveID;
     }
 
     @Override

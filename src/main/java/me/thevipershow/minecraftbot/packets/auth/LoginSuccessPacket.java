@@ -21,8 +21,9 @@ public final class LoginSuccessPacket extends AbstractPacket {
             final int length = DataUtils.readVarInt(dis);
             final int id = DataUtils.readVarInt(dis);
             DataUtils.checkPacket(getId(), id, length, false);
+            uuid = UUID.fromString( DataUtils.readString(dis));
             username = DataUtils.readString(dis);
-            uuid = UUID.fromString(DataUtils.readUnformattedString(dis));
+            System.out.println(uuid.toString() + " " + username );
         } catch (final IOException e) {
             e.printStackTrace();
         }

@@ -10,7 +10,7 @@ public class ServerKeepAlive extends AbstractPacket {
     private final int keepAliveID;
 
     public ServerKeepAlive(final int keepAliveID) {
-        super(0x00, PacketType.TO_CLIENT);
+        super(0x00, PacketType.TO_SERVER);
         this.keepAliveID = keepAliveID;
     }
 
@@ -25,6 +25,7 @@ public class ServerKeepAlive extends AbstractPacket {
     @Override
     public void writeData() {
         try {
+            writeID();
             DataUtils.writeVarInt(dataOutputStream, keepAliveID);
         } catch (final IOException e) {
             e.printStackTrace();

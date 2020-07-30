@@ -122,6 +122,17 @@ public final class DataUtils {
         return i;
     }
 
+    public static int readVarIntFromBytes(final byte[] bytes) {
+        int i = 0;
+        int j = 0;
+        for (byte b : bytes) {
+            i |= (b & 0x7F) << j++ * 7;
+            if (j > 5) throw new RuntimeException("VarInt too big");
+            if ((b & 0x80) != 128) break;
+        }
+        return i;
+    }
+
     public static void writeVarInt(final DataOutputStream out, int paramInt) throws IOException {
         while (true) {
             if ((paramInt & 0xFFFFFF80) == 0) { // 0xFFFFFF80 is 0x80 full

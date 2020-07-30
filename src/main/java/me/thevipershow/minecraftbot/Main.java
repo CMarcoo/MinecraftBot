@@ -11,10 +11,10 @@ import me.thevipershow.minecraftbot.json.ServerResponse;
 import me.thevipershow.minecraftbot.packets.auth.LoginStartPacket;
 import me.thevipershow.minecraftbot.packets.auth.LoginSuccessPacket;
 import me.thevipershow.minecraftbot.packets.auth.SetCompressionPacket;
+import me.thevipershow.minecraftbot.packets.game.JoinGamePacket;
+import me.thevipershow.minecraftbot.packets.game.PlayerKeepAlive;
+import me.thevipershow.minecraftbot.packets.game.ServerKeepAlive;
 import me.thevipershow.minecraftbot.packets.handshake.HandshakePacket;
-import me.thevipershow.minecraftbot.packets.handshake.PingPacket;
-import me.thevipershow.minecraftbot.packets.handshake.RequestPacket;
-import me.thevipershow.minecraftbot.packets.handshake.ResponsePacket;
 
 /**
  * @author TheViperShow
@@ -52,7 +52,7 @@ public final class Main {
 
             final InetAddress dstAddress = InetAddress.getByName(address);
             final Socket socket = new Socket(dstAddress, port);
-            socket.setSoTimeout(5000); // this sets a connection timeout, the connection will close if the server doesn't respond for more than 3.5 sec
+            socket.setSoTimeout(3500); // this sets a connection timeout, the connection will close if the server doesn't respond for more than 3.5 sec
             socket.setTcpNoDelay(true); // Enable Nagle's algorithm
             socket.setTrafficClass(18); // no idea what this does
 
@@ -62,15 +62,17 @@ public final class Main {
             final DataInputStream dataInputStream = new DataInputStream(socket.getInputStream()); // server -> client
 
             final HandshakePacket handshake = new HandshakePacket(0x2F, address, port, HandshakePacket.HandshakeNextState.LOGIN);
-            final LoginStartPacket loginStart = new LoginStartPacket("LegitPlayer");
+            final LoginStartPacket loginStart = new LoginStartPacket("LegitPlayer2");
             final LoginSuccessPacket loginSuccessPacket = new LoginSuccessPacket();
-            final SetCompressionPacket setCompressionPacket = new SetCompressionPacket();
+            final JoinGamePacket joinGamePacket = new JoinGamePacket();
 
             handshake.sendPacket(dataOutputStream);
             loginStart.sendPacket(dataOutputStream);
 
             loginSuccessPacket.readData(dataInputStream);
-            setCompressionPacket.readData(dataInputStream);
+            joinGamePacket.readData(dataInputStream);
+
+            println(joinGamePacket.toString());
 
             dataOutputStream.close(); // closing all connections
             dataInputStream.close();
