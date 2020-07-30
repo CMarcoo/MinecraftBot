@@ -1,15 +1,13 @@
 package me.thevipershow.minecraftbot;
 
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
 import java.net.InetAddress;
-import java.net.InetSocketAddress;
 import java.net.Socket;
-import me.thevipershow.minecraftbot.packets.auth.LoginStartPacket;
-import me.thevipershow.minecraftbot.packets.auth.LoginSuccessPacket;
-import me.thevipershow.minecraftbot.packets.auth.SetCompressionPacket;
-import me.thevipershow.minecraftbot.packets.game.PlayerKeepAlive;
+import me.thevipershow.minecraftbot.json.ServerResponse;
 import me.thevipershow.minecraftbot.packets.handshake.HandshakePacket;
 import me.thevipershow.minecraftbot.packets.handshake.PingPacket;
 import me.thevipershow.minecraftbot.packets.handshake.RequestPacket;
@@ -20,6 +18,8 @@ import me.thevipershow.minecraftbot.packets.handshake.ResponsePacket;
  * @version 1.0.0-SNAPSHOT
  */
 public final class Main {
+
+    private static final Gson gson = new GsonBuilder().setPrettyPrinting().registerTypeAdapter(ServerResponse.class, ServerResponse.responseDeserializer).create();
 
     public static void sleep(final long millis) {
         try {
@@ -37,6 +37,7 @@ public final class Main {
             println(s1);
     }
 
+
     public static void main(final String[] args) {
         final ArgumentsHandler argsHandler = new ArgumentsHandler(args); // A simple object to parse the jvm arguments.
         final String address = argsHandler.getAddress();
@@ -47,12 +48,10 @@ public final class Main {
         try {
 
             final InetAddress dstAddress = InetAddress.getByName(address);
-            final Socket socket = new Socket();
+            final Socket socket = new Socket(dstAddress, port);
             socket.setSoTimeout(5000); // this sets a connection timeout, the connection will close if the server doesn't respond for more than 3.5 sec
             socket.setTcpNoDelay(true); // Enable Nagle's algorithm
-            socket.setTrafficClass(18); // settings traffic class.
-            final InetSocketAddress inetSocketAddress = new InetSocketAddress(dstAddress, port); // The server we are going to connect to
-            socket.connect(inetSocketAddress); // connecting
+            socket.setTrafficClass(18); // no idea what this does
 
             println(String.format("Connected to destination Socket: [%s, %d]", address, port));
 
@@ -61,7 +60,7 @@ public final class Main {
 
             // Initializing the HandshakePacket (https://wiki.vg/Protocol#Handshake)
             // This packet is the first packet and will be sent to the server, telling him to start a login phase.
-            final HandshakePacket handshake = new HandshakePacket(47, address, port, HandshakePacket.HandshakeNextState.LOGIN);  // 0x2F is 47, the protocol for 1.8-1.8.9
+            final HandshakePacket handshake = new HandshakePacket(0x2F, address, port, HandshakePacket.HandshakeNextState.STATUS);  // 0x2F is 47, the protocol for 1.8-1.8.9
             handshake.sendPacket(dataOutputStream); // sending the packet to the server
 
             // Initializing the RequestPacket (https://wiki.vg/Protocol#Request)
@@ -80,22 +79,7 @@ public final class Main {
             final ResponsePacket responsePacket = new ResponsePacket();
             responsePacket.readData(dataInputStream);
 
-            println(responsePacket.getResponse());
-
-            // Initializing the LoginStartPacket (https://wiki.vg/Protocol#Login_Start)
-            // This makes the server start the authentication process, we will skip encryption as we're targeting offline-mode.
-            final LoginStartPacket loginStart = new LoginStartPacket("Skeppy");
-            loginStart.sendPacket(dataOutputStream); // sending the packet to the server
-
-            // We'll start reading packets , if everything has worked we should receive a LoginSuccessPacket (https://wiki.vg/Protocol#Login_Success)
-            final LoginSuccessPacket loginSuccessPacket = new LoginSuccessPacket();
-            loginSuccessPacket.readData(dataInputStream); // reading data
-
-            // The server should send us a setCompression packet after the login success.
-            // https://wiki.vg/Protocol#Set_Compression
-            final SetCompressionPacket setCompressionPacket = new SetCompressionPacket();
-            setCompressionPacket.readData(dataInputStream);
-
+            println(DataUtils.formatJson(responsePacket.getResponse())); // printing the result
 
             dataOutputStream.close(); // closing all connections
             dataInputStream.close();

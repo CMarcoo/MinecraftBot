@@ -1,6 +1,7 @@
 package me.thevipershow.minecraftbot.packets.handshake;
 
 import java.io.DataOutputStream;
+import java.io.IOException;
 import me.thevipershow.minecraftbot.packets.AbstractPacket;
 import me.thevipershow.minecraftbot.packets.PacketType;
 
@@ -10,6 +11,9 @@ public final class RequestPacket extends AbstractPacket {
     }
 
     @Override
-    public void writeData() { // do nothing. Avoid UnsupportedOperationException
+    public void writeData() {
+        try {
+            writeID();
+        } catch (final IOException e) {}
     }
 }
